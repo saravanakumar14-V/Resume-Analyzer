@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AI Resume Analyzer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            border-radius: 8px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        textarea,
+        input[type="file"],
+        button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 20px;
+            background: #eef;
+            padding: 10px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>AI Resume Analyzer</h2>
+
+        <label>Upload Resume (PDF/DOCX)</label>
+        <input type="file" id="resumeFile">
+
+        <label>Job Description</label>
+        <textarea id="jobDesc" rows="6"></textarea>
+
+        <button onclick="analyze()">Analyze</button>
+
+        <div class="result" id="output"></div>
+    </div>
+
+    <script>
+        async function analyze() {
+            const fileInput = document.getElementById("resumeFile");
+            const jobDesc = document.getElementById("jobDesc").value;
+            const output = document.getElementById("output");
+
+            if (!fileInput.files.length || !jobDesc) {
+                alert("Upload resume and enter job description");
+                return;
+            }
+
+            // STEP 1: Upload resume
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const uploadRes = await fetch("http://127.0.0.1:8001/upload-resume", {
+                method: "POST",
+                body: formData
+            });
+
+            const resumeData = await uploadRes.json();
+            const resumeText = resumeData.preview;
+
+            // STEP 2: Get suggestions
+            const matchRes = await fetch("http://127.0.0.1:8001/resume-suggestions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    resume_text: resumeText,
+                    job_description: jobDesc
+                })
+            });
+
+            const result = await matchRes.json();
+
+            output.innerHTML = `
+    <strong>Match Percentage:</strong> ${result.match.match_percentage}%<br><br>
+    <strong>Missing Skills:</strong> ${result.match.missing_skills.join(", ")}<br><br>
+    <strong>Suggestions:</strong>
+    <ul>${result.suggestions.map(s => `<li>${s}</li>`).join("")}</ul>
+  `;
+        }
+    </script>
+
+</body>
+
+</html>
