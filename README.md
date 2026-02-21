@@ -4,7 +4,6 @@ A beginner-friendly full-stack web application that allows users to upload resum
 
 This project was built as my first complete full-stack project to understand how frontend, backend, APIs, and GitHub work together.
 
----
 
 🚀 Features
 
