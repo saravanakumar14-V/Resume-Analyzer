@@ -126,7 +126,6 @@ This project was built to:
 👨‍💻 Author
 
 Saravana Kumar  
-Second-year Computer Science Student  
 
 ---
 
